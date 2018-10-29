@@ -25,3 +25,4 @@ Bundle-ClassPath: .,
 Service-Component: OSGI-INF/jpa.xml, OSGI-INF/configuration.xml
 Meta-Persistence: META-INF/persistence.xml
 Bundle-Activator: org.openhab.persistence.jpa.internal.JpaPersistenceServiceActivator
+Export-Package: org.apache.openjpa.json

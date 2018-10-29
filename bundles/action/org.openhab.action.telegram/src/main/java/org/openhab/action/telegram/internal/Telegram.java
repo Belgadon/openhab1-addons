@@ -72,7 +72,7 @@ public class Telegram {
 
     @ActionDoc(text = "Sends a Telegram via Telegram REST API - direct message")
     static public boolean sendTelegram(@ParamDoc(name = "group") String group,
-                                       @ParamDoc(name = "message") String message) {
+            @ParamDoc(name = "message") String message, @ParamDoc(name = "reply_markup") String reply_markup) {
 
         if (groupTokens.get(group) == null) {
             logger.warn("Bot '{}' not defined; action skipped.", group);
@@ -88,10 +88,9 @@ public class Telegram {
         postMethod.getParams().setSoTimeout(HTTP_TIMEOUT);
         postMethod.getParams().setParameter(HttpMethodParams.RETRY_HANDLER,
                 new DefaultHttpMethodRetryHandler(HTTP_RETRIES, false));
-        NameValuePair[] data = {new NameValuePair("chat_id", groupTokens.get(group).getChatId()),
-                new NameValuePair("text", message)};
+        NameValuePair[] data = { new NameValuePair("chat_id", groupTokens.get(group).getChatId()),
+                new NameValuePair("text", message), new NameValuePair("reply_markup", reply_markup) };
         postMethod.setRequestBody(data);
-
         try {
             int statusCode = client.executeMethod(postMethod);
 
@@ -137,39 +136,38 @@ public class Telegram {
 
     @ActionDoc(text = "Sends a Telegram via Telegram REST API - build message with format and args")
     static public boolean sendTelegram(@ParamDoc(name = "group") String group, @ParamDoc(name = "format") String format,
-                                       @ParamDoc(name = "args") Object... args) {
-
-        return sendTelegram(group, String.format(format, args));
+            @ParamDoc(name = "reply_markup") String reply_markup, @ParamDoc(name = "args") Object... args) {
+        return sendTelegram(group, String.format(format, args), reply_markup);
     }
 
     @ActionDoc(text = "Sends a Picture via Telegram REST API")
     static public boolean sendTelegramPhoto(@ParamDoc(name = "group") String group,
-                                            @ParamDoc(name = "photoURL") String photoURL, @ParamDoc(name = "caption") String caption) {
+            @ParamDoc(name = "photoURL") String photoURL, @ParamDoc(name = "caption") String caption) {
 
         return sendTelegramPhoto(group, photoURL, caption, null, null, HTTP_PHOTO_TIMEOUT, HTTP_RETRIES);
     }
 
     @ActionDoc(text = "Sends a Picture via Telegram REST API, using custom HTTP timeout")
     static public boolean sendTelegramPhoto(@ParamDoc(name = "group") String group,
-                                            @ParamDoc(name = "photoURL") String photoURL, @ParamDoc(name = "caption") String caption,
-                                            @ParamDoc(name = "timeoutMillis") Integer timeoutMillis) {
+            @ParamDoc(name = "photoURL") String photoURL, @ParamDoc(name = "caption") String caption,
+            @ParamDoc(name = "timeoutMillis") Integer timeoutMillis) {
 
         return sendTelegramPhoto(group, photoURL, caption, null, null, timeoutMillis, HTTP_RETRIES);
     }
 
     @ActionDoc(text = "Sends a Picture, protected by username/password authentication, via Telegram REST API")
     static public boolean sendTelegramPhoto(@ParamDoc(name = "group") String group,
-                                            @ParamDoc(name = "photoURL") String photoURL, @ParamDoc(name = "caption") String caption,
-                                            @ParamDoc(name = "username") String username, @ParamDoc(name = "password") String password) {
+            @ParamDoc(name = "photoURL") String photoURL, @ParamDoc(name = "caption") String caption,
+            @ParamDoc(name = "username") String username, @ParamDoc(name = "password") String password) {
         return sendTelegramPhoto(group, photoURL, caption, username, password, HTTP_PHOTO_TIMEOUT, HTTP_RETRIES);
 
     }
 
     @ActionDoc(text = "Sends a Picture, protected by username/password authentication, using custom HTTP timeout and retries, via Telegram REST API")
     static public boolean sendTelegramPhoto(@ParamDoc(name = "group") String group,
-                                            @ParamDoc(name = "photoURL") String photoURL, @ParamDoc(name = "caption") String caption,
-                                            @ParamDoc(name = "username") String username, @ParamDoc(name = "password") String password,
-                                            @ParamDoc(name = "timeoutMillis") int timeoutMillis, @ParamDoc(name = "retries") int retries) {
+            @ParamDoc(name = "photoURL") String photoURL, @ParamDoc(name = "caption") String caption,
+            @ParamDoc(name = "username") String username, @ParamDoc(name = "password") String password,
+            @ParamDoc(name = "timeoutMillis") int timeoutMillis, @ParamDoc(name = "retries") int retries) {
 
         if (groupTokens.get(group) == null) {
             logger.warn("Bot '{}' not defined; action skipped.", group);
@@ -273,8 +271,7 @@ public class Telegram {
                     new DefaultHttpMethodRetryHandler(retries, false));
             Part[] parts = new Part[caption != null ? 3 : 2];
             parts[0] = new StringPart("chat_id", groupTokens.get(group).getChatId());
-            parts[1] = new FilePart("photo",
-                    new ByteArrayPartSource(String.format("image.%s", imageType), image));
+            parts[1] = new FilePart("photo", new ByteArrayPartSource(String.format("image.%s", imageType), image));
             if (caption != null) {
                 parts[2] = new StringPart("caption", caption, "UTF-8");
             }
@@ -303,4 +300,5 @@ public class Telegram {
             postMethod.releaseConnection();
         }
     }
+
 }
